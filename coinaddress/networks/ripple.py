@@ -15,7 +15,9 @@ def get_ripple_from_pubkey(pubkey: bytes) -> str:
     return RippleBaseDecoder.encode(ripemd160.digest())
 
 
-def to_bytes(number: int, length: typing.Optional[int] = None, endianess: str = "big"):
+def to_bytes(
+    number: int, length: typing.Optional[int] = None, endianess: str = "big"
+) -> bytes:
     """Will take an integer and serialize it to a string of bytes.
     Python 3 has this, this is originally a backport to Python 2, from:
         http://stackoverflow.com/a/16022710/15677
@@ -25,13 +27,14 @@ def to_bytes(number: int, length: typing.Optional[int] = None, endianess: str = 
     Alternative implementation here:
        https://github.com/nederhoed/python-bitcoinaddress/blob/c3db56f0a2d4b2a069198e2db22b7f607158518c/bitcoinaddress/__init__.py#L26
     """
-    # TODO: Upgrade this function
     h = hex(number)
     s = "0" * (len(h) % 2) + h
     if length:
         if len(s) > length * 2:
-            raise ValueError("number of large for {} bytes".format(length))
+            raise ValueError("Length too large for {} bytes".format(length))
+
         s = s.zfill(length * 2)
+
     s = bytes.fromhex(s)
     return s if endianess == "big" else s[::-1]
 
@@ -50,16 +53,17 @@ class RippleBaseDecoder(object):
     alphabet: typing.ClassVar[
         str
     ] = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
+    version: typing.ClassVar[bytes] = b"\x00"
 
     @classmethod
-    def decode(cls, *a, **kw):
+    def decode(cls, encoded: str, pad_length: typing.Optional[int] = None):
         """Apply base58 decode, verify checksum, return payload."""
-        decoded = cls.decode_base(*a, **kw)
+        decoded = cls.decode_base(encoded, pad_length)
         assert cls.verify_checksum(decoded)
-        payload = decoded[:-4]  # remove the checksum
-        payload = payload[1:]  # remove first byte, a version number
 
-        return payload
+        # 1 -> remove first byte, a version number
+        # -4 -> remove the checksum
+        return decoded[1:-4]
 
     @classmethod
     def decode_base(cls, encoded: str, pad_length: typing.Optional[int] = None):
@@ -72,10 +76,10 @@ class RippleBaseDecoder(object):
         return to_bytes(n, pad_length, "big")
 
     @classmethod
-    def verify_checksum(cls, bytes):
+    def verify_checksum(cls, bytes_: bytes) -> bool:
         """These ripple byte sequences have a checksum builtin."""
-        calculated = hashlib.sha256(hashlib.sha256(bytes[:-4]).digest())
-        valid = bytes[-4:] == calculated.digest()[:4]
+        calculated = hashlib.sha256(hashlib.sha256(bytes_[:-4]).digest())
+        valid = bytes_[-4:] == calculated.digest()[:4]
 
         return valid
 
@@ -86,12 +90,9 @@ class RippleBaseDecoder(object):
     @classmethod
     def encode(cls, data: bytes) -> str:
         """Apply base58 encode including version, checksum."""
-        version = b"\x00"
-        bytes_ = version + data
-        bytes_ += hashlib.sha256(hashlib.sha256(bytes_).digest()).digest()[
-            :4
-        ]  # checksum
-
+        bytes_ = cls.version + data
+        # checksum
+        bytes_ += hashlib.sha256(hashlib.sha256(bytes_).digest()).digest()[:4]
         return cls.encode_base(bytes_)
 
     @classmethod
@@ -107,14 +108,8 @@ class RippleBaseDecoder(object):
             res.append(cls.alphabet[r])
 
         res = "".join(res[::-1])
-
         # Encode leading zeros as base58 zeros
-        pad = 0
-        for c in data:
-            if c != 0:
-                break
-
-            pad += 1
+        pad = data.find(0)
 
         return cls.alphabet[0] * pad + res
 
