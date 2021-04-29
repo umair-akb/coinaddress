@@ -1,15 +1,17 @@
 import typing
 
-from .registry import registry
+from coinaddress.networks.registry import registry
 
-from .bitcoin import Bitcoin
-from .bitcoin_cash import BitcoinCash
-from .ethereum import Ethereum
-from .litecoin import Litecoin
-from .ripple import Ripple
+from coinaddress.networks.base import BaseNetwork
+from coinaddress.networks.bitcoin import Bitcoin
+from coinaddress.networks.bitcoin_cash import BitcoinCash
+from coinaddress.networks.ethereum import Ethereum
+from coinaddress.networks.litecoin import Litecoin
+from coinaddress.networks.ripple import Ripple
 
 __all__: typing.Final[typing.List[str]] = [
     "registry",
+    "Base",
     "Bitcoin",
     "BitcoinCash",
     "Ethereum",

@@ -1,5 +1,5 @@
-from .base import BaseNetwork
-from .registry import registry
+from coinaddress.networks.base import BaseNetwork
+from coinaddress.networks.registry import registry
 
 
 @registry.register("bitcoin", "BTC")

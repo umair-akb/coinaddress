@@ -7,7 +7,7 @@ from ecdsa.ecdsa import Public_key as ECDSAPublicKey
 from ecdsa.ellipticcurve import Point
 from ecdsa.keys import VerifyingKey
 
-from .utils import int_to_hex, create_verifying_key
+from coinaddress.utils import int_to_hex, create_verifying_key
 
 
 class PublicKey:

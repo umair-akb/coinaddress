@@ -1,8 +1,7 @@
 """Main module."""
 import typing
 
-from .networks import registry
-from .networks.base import BaseNetwork
+from coinaddress.networks import registry, BaseNetwork
 
 
 def get_network(name: str) -> typing.Optional[BaseNetwork]:
