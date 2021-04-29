@@ -87,3 +87,15 @@ class BitcoinCash(BaseNetwork):
         checksum = calculate_checksum(prefix, payload)
 
         return prefix + ":" + b32encode(payload + checksum)
+
+
+__all__: typing.Final[typing.List[str]] = [
+    "CHARSET",
+    "GENERATOR",
+    "b32encode",
+    "polymod",
+    "prefix_expand",
+    "calculate_checksum",
+    "convertbits",
+    "BitcoinCash",
+]

@@ -1,4 +1,6 @@
+import typing
 from binascii import hexlify
+
 from sha3 import keccak_256
 
 from coinaddress.keys import PublicKey
@@ -28,3 +30,6 @@ class Ethereum(BaseNetwork):
         eth_address = "0x{}".format(hexlify(keccak[12:]).decode("ascii"))
 
         return to_checksum_address(eth_address)
+
+
+__all__: typing.Final[typing.List[str]] = ["to_checksum_address", "Ethereum"]

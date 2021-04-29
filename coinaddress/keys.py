@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import typing
 from binascii import hexlify, unhexlify
 
 from ecdsa.curves import SECP256k1
@@ -7,7 +8,7 @@ from ecdsa.ecdsa import Public_key as ECDSAPublicKey
 from ecdsa.ellipticcurve import Point
 from ecdsa.keys import VerifyingKey
 
-from coinaddress.utils import int_to_hex, create_verifying_key
+from coinaddress.utils import create_verifying_key, int_to_hex
 
 
 class PublicKey:
@@ -89,3 +90,5 @@ class PublicKey:
         y = self.point.y().to_bytes(nbytes, "big")
 
         return bytes([0x04]) + x + y
+
+__all__: typing.Final[typing.List[str]] = ["PublicKey"]

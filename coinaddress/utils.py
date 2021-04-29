@@ -1,3 +1,4 @@
+import typing
 from binascii import hexlify
 
 from ecdsa.curves import SECP256k1
@@ -59,3 +60,6 @@ def verifying_key_from_hex(key: bytes) -> VerifyingKey:
 def create_verifying_key(x: int, y: int) -> VerifyingKey:
     point = Point(SECP256k1.curve, x, y)
     return VerifyingKey.from_public_point(point, curve=SECP256k1)
+
+
+__all__: typing.Final[typing.List[str]] = ["int_to_hex", "verifying_key_from_hex", "create_verifying_key"]

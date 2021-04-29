@@ -23,3 +23,6 @@ class Registry:
 
 
 registry: typing.Final[Registry] = Registry()
+
+
+__all__: typing.Final[typing.List[str]] = ["registry", "Registry"]
