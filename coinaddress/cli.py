@@ -13,7 +13,7 @@ from .networks import registry
 @click.option('--output', '-o', default='-', type=click.File('w'))
 @click.option('--number', '--num', '-n', default=1, type=int,
               help="Number of addresses to generate")
-def main(network, xpub, xpub_file, path, output, number=1):
+def main(network: str, xpub: str, xpub_file: click.File, path: str, output: click.File, number: int = 1) -> int:
     """Coin address generation CLI.
 
     You can generate one or multiple coin addresses from xpub.
@@ -49,17 +49,21 @@ def main(network, xpub, xpub_file, path, output, number=1):
     """
     if xpub is None:
         xpub = xpub_file.readline().strip()
+
     net = registry.get(network)
     path_parts = path.split('/')
     last_index = int(path_parts[-1])
     prefix = '/'.join(path_parts[:-1])
+
     for i in range(last_index, last_index + number):
         index_path = f'{i}'
         if prefix:
             index_path = f'{prefix}/{i}'
+
         result = net.get_address(xpub=xpub, path=index_path)
         output.write(result)
         output.write('\n')
+
     return 0
 
 

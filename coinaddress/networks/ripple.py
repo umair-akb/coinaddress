@@ -1,19 +1,23 @@
+import typing
+
 import hashlib
 from binascii import hexlify
 
-from .base import BaseNetwork
-from .registry import registry
+from coinaddress.keys import PublicKey
+from coinaddress.networks.base import BaseNetwork
+from coinaddress.networks.registry import registry
 
 
-def get_ripple_from_pubkey(pubkey):
+def get_ripple_from_pubkey(pubkey: bytes) -> str:
     """Given a public key, determine the Ripple address.
     """
-    ripemd160 = hashlib.new('ripemd160')
+    ripemd160 = hashlib.new("ripemd160")
     ripemd160.update(hashlib.sha256(pubkey).digest())
+
     return RippleBaseDecoder.encode(ripemd160.digest())
 
 
-def to_bytes(number, length=None, endianess='big'):
+def to_bytes(number: int, length: typing.Optional[int] = None, endianess: str = "big"):
     """Will take an integer and serialize it to a string of bytes.
     Python 3 has this, this is originally a backport to Python 2, from:
         http://stackoverflow.com/a/16022710/15677
@@ -23,7 +27,8 @@ def to_bytes(number, length=None, endianess='big'):
     Alternative implementation here:
        https://github.com/nederhoed/python-bitcoinaddress/blob/c3db56f0a2d4b2a069198e2db22b7f607158518c/bitcoinaddress/__init__.py#L26
     """
-    h = '%x' % number
+    # TODO: Upgrade this function
+    h = hex(number)
     s = ('0'*(len(h) % 2) + h)
     if length:
         if len(s) > length*2:
@@ -33,11 +38,9 @@ def to_bytes(number, length=None, endianess='big'):
     return s if endianess == 'big' else s[::-1]
 
 
-@registry.register('ripple', 'XRP')
+@registry.register("ripple", "XRP")
 class Ripple(BaseNetwork):
-    pubkey_address_prefix = 0x00
-
-    def public_key_to_address(self, node):
+    def public_key_to_address(self, node: PublicKey):
         return get_ripple_from_pubkey(
             bytes.fromhex(node.hex().decode())
         )
@@ -48,7 +51,7 @@ class RippleBaseDecoder(object):
     This is what ripple-lib does in ``base.js``.
     """
 
-    alphabet = 'rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz'
+    alphabet: typing.ClassVar[str] = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
 
     @classmethod
     def decode(cls, *a, **kw):
@@ -58,16 +61,18 @@ class RippleBaseDecoder(object):
         assert cls.verify_checksum(decoded)
         payload = decoded[:-4]  # remove the checksum
         payload = payload[1:]  # remove first byte, a version number
+
         return payload
 
     @classmethod
-    def decode_base(cls, encoded, pad_length=None):
+    def decode_base(cls, encoded: str, pad_length: typing.Optional[int] = None):
         """Decode a base encoded string with the Ripple alphabet."""
         n = 0
         base = len(cls.alphabet)
         for char in encoded:
             n = n * base + cls.alphabet.index(char)
-        return to_bytes(n, pad_length, 'big')
+
+        return to_bytes(n, pad_length, "big")
 
     @classmethod
     def verify_checksum(cls, bytes):
@@ -75,41 +80,44 @@ class RippleBaseDecoder(object):
         """
         calculated = hashlib.sha256(hashlib.sha256(bytes[:-4]).digest())
         valid = bytes[-4:] == calculated.digest()[:4]
+
         return valid
 
     @staticmethod
-    def as_ints(bytes):
-        return list([ord(c) for c in bytes])
+    def as_ints(bytes_: str) -> typing.List[int]:
+        return [ord(c) for c in bytes_]
 
     @classmethod
-    def encode(cls, data):
+    def encode(cls, data: bytes) -> str:
         """Apply base58 encode including version, checksum."""
         version = b'\x00'
-        bytes = version + data
-        bytes += hashlib.sha256(
-            hashlib.sha256(bytes).digest()
+        bytes_ = version + data
+        bytes_ += hashlib.sha256(
+            hashlib.sha256(bytes_).digest()
         ).digest()[:4]   # checksum
-        return cls.encode_base(bytes)
+
+        return cls.encode_base(bytes_)
 
     @classmethod
-    def encode_base(cls, data):
+    def encode_base(cls, data: bytes) -> str:
         # https://github.com/jgarzik/python-bitcoinlib/blob/master/bitcoin/base58.py  # noqa
         # Convert big-endian bytes to integer
-        n = int(hexlify(data).decode('utf8'), 16)
+        n = int(hexlify(data).decode(), 16)
 
         # Divide that integer into base58
         res = []
         while n > 0:
             n, r = divmod(n, len(cls.alphabet))
             res.append(cls.alphabet[r])
+
         res = ''.join(res[::-1])
 
         # Encode leading zeros as base58 zeros
-        czero = 0
         pad = 0
         for c in data:
-            if c == czero:
-                pad += 1
-            else:
+            if c != 0:
                 break
+
+            pad += 1
+
         return cls.alphabet[0] * pad + res

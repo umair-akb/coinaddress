@@ -4,28 +4,33 @@ from binascii import hexlify, unhexlify
 
 from ecdsa.curves import SECP256k1
 from ecdsa.ecdsa import Public_key as ECDSAPublicKey
+from ecdsa.ellipticcurve import Point
+from ecdsa.keys import VerifyingKey
 
 from .utils import int_to_hex, create_verifying_key
 
 
 class PublicKey:
-
-    def __init__(self, chain_code, verifying_key):
-        self.verifying_key = verifying_key
-        self.chain_code = chain_code
+    def __init__(self, chain_code: bytes, verifying_key: VerifyingKey):
+        self.verifying_key: VerifyingKey = verifying_key
+        self.chain_code: bytes = chain_code
 
     def get_child_from_path(self, path: str):
         parts = path.split('/')
         node = self
+
         for p in parts:
             if p == 'M':
                 continue
             if 'm' in p or "'" in p:
                 raise RuntimeError("Can't be used to generate private keys")
+
             part_index = int(p)
             if part_index < 0:
                 raise ValueError("Index can't be less than 0")
+
             node = node.get_child(part_index)
+
         return node
 
     def get_child(self, child_number):
@@ -73,16 +78,18 @@ class PublicKey:
         return child
 
     @property
-    def point(self):
+    def point(self) -> Point:
         return self.verifying_key.pubkey.point
 
     def hex(self) -> bytes:
         x, y = self.point.x(), self.point.y()
         parity = 2 + (y & 1)  # 0x02 even, 0x03 odd
+
         return int_to_hex(parity, 2) + int_to_hex(x, 64)
 
     def __bytes__(self) -> bytes:
         nbytes = self.verifying_key.curve.baselen
-        x = self.point.x().to_bytes(nbytes, 'big')
-        y = self.point.y().to_bytes(nbytes, 'big')
+        x = self.point.x().to_bytes(nbytes, "big")
+        y = self.point.y().to_bytes(nbytes, "big")
+
         return bytes([0x04]) + x + y

@@ -1,8 +1,8 @@
 from binascii import hexlify
 
-from ecdsa.keys import VerifyingKey
 from ecdsa.curves import SECP256k1
 from ecdsa.ellipticcurve import Point
+from ecdsa.keys import VerifyingKey
 from ecdsa.numbertheory import square_root_mod_prime
 
 
@@ -15,12 +15,13 @@ def int_to_hex(x: int, size) -> bytes:
     return f_str.format(x).lower().encode()
 
 
-def verifying_key_from_hex(key: bytes):
+def verifying_key_from_hex(key: bytes) -> VerifyingKey:
     """Load the VerifyingKey from a compressed or uncompressed hex public key.
     """
     id_byte = key[0]
     if not isinstance(id_byte, int):
         id_byte = ord(id_byte)
+
     if id_byte == 4:
         # Uncompressed public point
         # 1B ID + 32B x coord + 32B y coord = 65 B
@@ -34,6 +35,7 @@ def verifying_key_from_hex(key: bytes):
         # Compressed public point
         if len(key) != 33:
             raise Exception("Invalid key length")
+
         y_odd = bool(id_byte & 0x01)  # 0 even, 1 odd
         x = int(hexlify(key[1:]), 16)
         # The following x-to-pair algorithm was lifted from pycoin
@@ -47,13 +49,15 @@ def verifying_key_from_hex(key: bytes):
         alpha = (pow(x, 3, p) + curve.a() * x + curve.b()) % p
         beta = square_root_mod_prime(alpha, p)
         y_even = not y_odd
+
         if y_even == bool(beta & 1):
             return create_verifying_key(x, p - beta)
         else:
             return create_verifying_key(x, beta)
+
     raise Exception("The given key is not in a known format.")
 
 
-def create_verifying_key(x, y):
+def create_verifying_key(x: int, y: int) -> VerifyingKey:
     point = Point(SECP256k1.curve, x, y)
     return VerifyingKey.from_public_point(point, curve=SECP256k1)

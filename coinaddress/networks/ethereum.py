@@ -1,15 +1,16 @@
 from binascii import hexlify
 from sha3 import keccak_256
 
-from .base import BaseNetwork
-from .registry import registry
+from coinaddress.keys import PublicKey
+from coinaddress.networks.base import BaseNetwork
+from coinaddress.networks.registry import registry
 
 
-def to_checksum_address(value):
+def to_checksum_address(value: str) -> str:
     norm_address = value.lower()
-    address_hash = '0x' + hexlify(
+    address_hash = "0x" + hexlify(
         keccak_256(norm_address[2:].encode()).digest()
-    ).decode('ascii')
+    ).decode("ascii")
 
     checksum_address = "".join(
         (
@@ -19,13 +20,15 @@ def to_checksum_address(value):
         )
         for i in range(2, 42)
     )
-    return '0x%s' % checksum_address
+
+    return "0x{}".format(checksum_address)
 
 
-@registry.register('ethereum', 'ETH')
+@registry.register("ethereum", "ETH")
 class Ethereum(BaseNetwork):
-    def public_key_to_address(self, node):
+    def public_key_to_address(self, node: PublicKey):
         pk_bytes = bytes(node)
         keccak = keccak_256(pk_bytes[1:]).digest()
-        eth_address = '0x%s' % hexlify(keccak[12:]).decode('ascii')
+        eth_address = "0x{}".format(hexlify(keccak[12:]).decode("ascii"))
+
         return to_checksum_address(eth_address)
