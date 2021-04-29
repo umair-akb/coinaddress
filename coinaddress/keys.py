@@ -18,6 +18,8 @@ class PublicKey:
         parts = path.split('/')
         node = self
         for p in parts:
+            if p == 'M':
+                continue
             if 'm' in p or "'" in p:
                 raise RuntimeError("Can't be used to generate private keys")
             part_index = int(p)
