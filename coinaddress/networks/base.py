@@ -29,15 +29,13 @@ class BaseNetwork:
         rh = hashlib.new("ripemd160", hashlib.sha256(key).digest())
         hash160_bytes = rh.digest()
         # Prepend the network address byte
-        network_hash160_bytes = \
-            bytes([self.pubkey_address_prefix]) + hash160_bytes
+        network_hash160_bytes = bytes([self.pubkey_address_prefix]) + hash160_bytes
 
         # Return a base58 encoded address with a checksum
         return base58.b58encode_check(network_hash160_bytes).decode()
 
     def deserialize_xpub(self, key: str) -> PublicKey:
-        """Load the ExtendedBip32Key from a hex key.
-        """
+        """Load the ExtendedBip32Key from a hex key."""
         key = base58.b58decode_check(key.encode())
         chain_code, key_data = key[13:45], key[45:]
 

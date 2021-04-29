@@ -2,6 +2,7 @@ import typing
 
 from coinaddress.networks.base import BaseNetwork
 
+
 class Registry:
     def __init__(self):
         self.__networks: typing.Dict[str, BaseNetwork] = {}
@@ -15,7 +16,9 @@ class Registry:
 
         return wrapper
 
-    def get(self, name: str, default: typing.Optional[BaseNetwork] = None) -> typing.Optional[BaseNetwork]:
+    def get(
+        self, name: str, default: typing.Optional[BaseNetwork] = None
+    ) -> typing.Optional[BaseNetwork]:
         return self.__networks.get(name, default)
 
 

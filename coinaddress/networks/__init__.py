@@ -9,10 +9,10 @@ from .litecoin import Litecoin
 from .ripple import Ripple
 
 __all__: typing.Final[typing.List[str]] = [
-    'registry',
-    'Bitcoin',
-    'BitcoinCash',
-    'Ethereum',
-    'Litecoin',
-    'Ripple'
+    "registry",
+    "Bitcoin",
+    "BitcoinCash",
+    "Ethereum",
+    "Litecoin",
+    "Ripple",
 ]

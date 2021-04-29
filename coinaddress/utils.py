@@ -16,8 +16,7 @@ def int_to_hex(x: int, size) -> bytes:
 
 
 def verifying_key_from_hex(key: bytes) -> VerifyingKey:
-    """Load the VerifyingKey from a compressed or uncompressed hex public key.
-    """
+    """Load the VerifyingKey from a compressed or uncompressed hex public key."""
     id_byte = key[0]
     if not isinstance(id_byte, int):
         id_byte = ord(id_byte)
@@ -28,8 +27,7 @@ def verifying_key_from_hex(key: bytes) -> VerifyingKey:
         if len(key) != 65:
             raise Exception("Invalid key length")
         return create_verifying_key(
-            int(hexlify(key[1:33]), 16),
-            int(hexlify(key[33:]), 16)
+            int(hexlify(key[1:33]), 16), int(hexlify(key[33:]), 16)
         )
     elif id_byte in [2, 3]:
         # Compressed public point

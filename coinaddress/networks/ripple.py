@@ -9,8 +9,7 @@ from coinaddress.networks.registry import registry
 
 
 def get_ripple_from_pubkey(pubkey: bytes) -> str:
-    """Given a public key, determine the Ripple address.
-    """
+    """Given a public key, determine the Ripple address."""
     ripemd160 = hashlib.new("ripemd160")
     ripemd160.update(hashlib.sha256(pubkey).digest())
 
@@ -29,21 +28,19 @@ def to_bytes(number: int, length: typing.Optional[int] = None, endianess: str = 
     """
     # TODO: Upgrade this function
     h = hex(number)
-    s = ('0'*(len(h) % 2) + h)
+    s = "0" * (len(h) % 2) + h
     if length:
-        if len(s) > length*2:
-            raise ValueError('number of large for {} bytes'.format(length))
-        s = s.zfill(length*2)
+        if len(s) > length * 2:
+            raise ValueError("number of large for {} bytes".format(length))
+        s = s.zfill(length * 2)
     s = bytes.fromhex(s)
-    return s if endianess == 'big' else s[::-1]
+    return s if endianess == "big" else s[::-1]
 
 
 @registry.register("ripple", "XRP")
 class Ripple(BaseNetwork):
     def public_key_to_address(self, node: PublicKey):
-        return get_ripple_from_pubkey(
-            bytes.fromhex(node.hex().decode())
-        )
+        return get_ripple_from_pubkey(bytes.fromhex(node.hex().decode()))
 
 
 class RippleBaseDecoder(object):
@@ -51,12 +48,13 @@ class RippleBaseDecoder(object):
     This is what ripple-lib does in ``base.js``.
     """
 
-    alphabet: typing.ClassVar[str] = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
+    alphabet: typing.ClassVar[
+        str
+    ] = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
 
     @classmethod
     def decode(cls, *a, **kw):
-        """Apply base58 decode, verify checksum, return payload.
-        """
+        """Apply base58 decode, verify checksum, return payload."""
         decoded = cls.decode_base(*a, **kw)
         assert cls.verify_checksum(decoded)
         payload = decoded[:-4]  # remove the checksum
@@ -76,8 +74,7 @@ class RippleBaseDecoder(object):
 
     @classmethod
     def verify_checksum(cls, bytes):
-        """These ripple byte sequences have a checksum builtin.
-        """
+        """These ripple byte sequences have a checksum builtin."""
         calculated = hashlib.sha256(hashlib.sha256(bytes[:-4]).digest())
         valid = bytes[-4:] == calculated.digest()[:4]
 
@@ -90,11 +87,11 @@ class RippleBaseDecoder(object):
     @classmethod
     def encode(cls, data: bytes) -> str:
         """Apply base58 encode including version, checksum."""
-        version = b'\x00'
+        version = b"\x00"
         bytes_ = version + data
-        bytes_ += hashlib.sha256(
-            hashlib.sha256(bytes_).digest()
-        ).digest()[:4]   # checksum
+        bytes_ += hashlib.sha256(hashlib.sha256(bytes_).digest()).digest()[
+            :4
+        ]  # checksum
 
         return cls.encode_base(bytes_)
 
@@ -110,7 +107,7 @@ class RippleBaseDecoder(object):
             n, r = divmod(n, len(cls.alphabet))
             res.append(cls.alphabet[r])
 
-        res = ''.join(res[::-1])
+        res = "".join(res[::-1])
 
         # Encode leading zeros as base58 zeros
         pad = 0

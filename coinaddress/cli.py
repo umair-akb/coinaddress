@@ -1,19 +1,33 @@
 """Console script for coinaddress."""
-import sys
+import typing
+
 import click
 
-from .networks import registry
+from coinaddress.networks import registry
 
 
 @click.command()
-@click.argument('network')
-@click.argument('path', default='0', type=str)
-@click.option('--xpub-file', default='-', type=click.File('r'))
-@click.option('--xpub', default=None)
-@click.option('--output', '-o', default='-', type=click.File('w'))
-@click.option('--number', '--num', '-n', default=1, type=int,
-              help="Number of addresses to generate")
-def main(network: str, xpub: str, xpub_file: click.File, path: str, output: click.File, number: int = 1) -> int:
+@click.argument("network")
+@click.argument("path", default="0", type=str)
+@click.option("--xpub-file", default="-", type=click.File("r"))
+@click.option("--xpub", default=None)
+@click.option("--output", "-o", default="-", type=click.File("w"))
+@click.option(
+    "--number",
+    "--num",
+    "-n",
+    default=1,
+    type=int,
+    help="Number of addresses to generate",
+)
+def main(
+    network: str,
+    xpub: str,
+    xpub_file: click.File,
+    path: str,
+    output: click.File,
+    number: int = 1,
+) -> int:
     """Coin address generation CLI.
 
     You can generate one or multiple coin addresses from xpub.
@@ -45,27 +59,25 @@ def main(network: str, xpub: str, xpub_file: click.File, path: str, output: clic
 
     xpub can be passed with `--xpub` option but you should avoid this and prefer
     read from file for security reasons.
-
     """
     if xpub is None:
         xpub = xpub_file.readline().strip()
 
     net = registry.get(network)
-    path_parts = path.split('/')
+    path_parts = path.split("/")
     last_index = int(path_parts[-1])
-    prefix = '/'.join(path_parts[:-1])
+    prefix = "/".join(path_parts[:-1])
 
     for i in range(last_index, last_index + number):
-        index_path = f'{i}'
+        index_path = f"{i}"
         if prefix:
-            index_path = f'{prefix}/{i}'
+            index_path = f"{prefix}/{i}"
 
         result = net.get_address(xpub=xpub, path=index_path)
         output.write(result)
-        output.write('\n')
+        output.write("\n")
 
     return 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+__all__: typing.Final[typing.List[str]] = ["main"]

@@ -13,11 +13,7 @@ def to_checksum_address(value: str) -> str:
     ).decode("ascii")
 
     checksum_address = "".join(
-        (
-            norm_address[i].upper()
-            if int(address_hash[i], 16) > 7
-            else norm_address[i]
-        )
+        (norm_address[i].upper() if int(address_hash[i], 16) > 7 else norm_address[i])
         for i in range(2, 42)
     )
 

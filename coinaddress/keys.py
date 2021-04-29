@@ -16,13 +16,13 @@ class PublicKey:
         self.chain_code: bytes = chain_code
 
     def get_child_from_path(self, path: str):
-        parts = path.split('/')
+        parts = path.split("/")
         node = self
 
         for p in parts:
-            if p == 'M':
+            if p == "M":
                 continue
-            if 'm' in p or "'" in p:
+            if "m" in p or "'" in p:
                 raise RuntimeError("Can't be used to generate private keys")
 
             part_index = int(p)
@@ -52,9 +52,7 @@ class PublicKey:
         # Compute a 64 Byte `i_full` that is the HMAC-SHA512, using
         # self.chain_code as the seed, and data as the message.
         i_full = hmac.new(
-            unhexlify(self.chain_code),
-            msg=unhexlify(data),
-            digestmod=hashlib.sha512
+            unhexlify(self.chain_code), msg=unhexlify(data), digestmod=hashlib.sha512
         ).digest()
         # split `i_full` into its 32 Byte components.
         i_left, i_right = i_full[:32], i_full[32:]
@@ -65,14 +63,12 @@ class PublicKey:
         g = SECP256k1.generator
         i_left_int = int(hexlify(i_left), 16)
         point = (
-            ECDSAPublicKey(g, g * i_left_int).point +
-            self.verifying_key.pubkey.point
+            ECDSAPublicKey(g, g * i_left_int).point + self.verifying_key.pubkey.point
         )
         # `i_right` is the child's chain code
 
         child = self.__class__(
-            chain_code=c_i,
-            verifying_key=create_verifying_key(point.x(), point.y())
+            chain_code=c_i, verifying_key=create_verifying_key(point.x(), point.y())
         )
 
         return child
