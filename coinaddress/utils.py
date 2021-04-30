@@ -62,4 +62,33 @@ def create_verifying_key(x: int, y: int) -> VerifyingKey:
     return VerifyingKey.from_public_point(point, curve=SECP256k1)
 
 
-__all__: typing.Final[typing.List[str]] = ["int_to_hex", "verifying_key_from_hex", "create_verifying_key"]
+def to_bytes(
+    number: int, length: typing.Optional[int] = None, endianess: str = "big"
+) -> bytes:
+    """Will take an integer and serialize it to a string of bytes.
+    Python 3 has this, this is originally a backport to Python 2, from:
+        http://stackoverflow.com/a/16022710/15677
+    We use it for Python 3 as well, because Python 3's builtin version
+    needs to be given an explicit length, which means our base decoder
+    API would have to ask for an explicit length, which just isn't as nice.
+    Alternative implementation here:
+       https://github.com/nederhoed/python-bitcoinaddress/blob/c3db56f0a2d4b2a069198e2db22b7f607158518c/bitcoinaddress/__init__.py#L26
+    """
+    h = hex(number)
+    s = "0" * (len(h) % 2) + h
+    if length:
+        if len(s) > length * 2:
+            raise ValueError("Length too large for {} bytes".format(length))
+
+        s = s.zfill(length * 2)
+
+    s = bytes.fromhex(s)
+    return s if endianess == "big" else s[::-1]
+
+
+__all__: typing.Final[typing.List[str]] = [
+    "int_to_hex",
+    "verifying_key_from_hex",
+    "create_verifying_key",
+    "to_bytes",
+]

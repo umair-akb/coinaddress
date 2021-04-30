@@ -5,6 +5,7 @@ from binascii import hexlify
 from coinaddress.keys import PublicKey
 from coinaddress.networks.base import BaseNetwork
 from coinaddress.networks.registry import registry
+from coinaddress.utils import to_bytes
 
 
 def get_ripple_from_pubkey(pubkey: bytes) -> str:
@@ -13,36 +14,6 @@ def get_ripple_from_pubkey(pubkey: bytes) -> str:
     ripemd160.update(hashlib.sha256(pubkey).digest())
 
     return RippleBaseDecoder.encode(ripemd160.digest())
-
-
-def to_bytes(
-    number: int, length: typing.Optional[int] = None, endianess: str = "big"
-) -> bytes:
-    """Will take an integer and serialize it to a string of bytes.
-    Python 3 has this, this is originally a backport to Python 2, from:
-        http://stackoverflow.com/a/16022710/15677
-    We use it for Python 3 as well, because Python 3's builtin version
-    needs to be given an explicit length, which means our base decoder
-    API would have to ask for an explicit length, which just isn't as nice.
-    Alternative implementation here:
-       https://github.com/nederhoed/python-bitcoinaddress/blob/c3db56f0a2d4b2a069198e2db22b7f607158518c/bitcoinaddress/__init__.py#L26
-    """
-    h = hex(number)
-    s = "0" * (len(h) % 2) + h
-    if length:
-        if len(s) > length * 2:
-            raise ValueError("Length too large for {} bytes".format(length))
-
-        s = s.zfill(length * 2)
-
-    s = bytes.fromhex(s)
-    return s if endianess == "big" else s[::-1]
-
-
-@registry.register("ripple", "XRP")
-class Ripple(BaseNetwork):
-    def public_key_to_address(self, node: PublicKey):
-        return get_ripple_from_pubkey(bytes.fromhex(node.hex().decode()))
 
 
 class RippleBaseDecoder(object):
@@ -112,6 +83,12 @@ class RippleBaseDecoder(object):
         pad = data.find(0)
 
         return cls.alphabet[0] * pad + res
+
+
+@registry.register("ripple", "XRP")
+class Ripple(BaseNetwork):
+    def public_key_to_address(self, node: PublicKey):
+        return get_ripple_from_pubkey(bytes.fromhex(node.hex().decode()))
 
 
 __all__: typing.Final[typing.List[str]] = [
