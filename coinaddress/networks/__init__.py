@@ -2,6 +2,7 @@ import typing
 
 from coinaddress.networks.base import *
 from coinaddress.networks.bitcoin import *
+from coinaddress.networks.bitcoin_bech32 import *
 from coinaddress.networks.bitcoin_cash import *
 from coinaddress.networks.ethereum import *
 from coinaddress.networks.litecoin import *
