@@ -11,8 +11,7 @@ def get_network(name: str) -> typing.Optional[BaseNetwork]:
 
 def address_from_xpub(network: str, xpub: str, path: str = "0") -> str:
     """Get address derived from xpub."""
-    net = get_network(network)
-    return net.get_address(xpub=xpub, path=path)
+    return get_network(network).get_address(xpub=xpub, path=path)
 
 
 __all__: typing.Final[typing.List[str]] = [

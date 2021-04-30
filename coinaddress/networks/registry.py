@@ -9,8 +9,9 @@ class Registry:
 
     def register(self, *names: str):
         def wrapper(cls: typing.Type[BaseNetwork]):
+            inst = cls()
             for n in names:
-                self.__networks[n] = cls()
+                self.__networks[n] = inst
 
             return cls
 
