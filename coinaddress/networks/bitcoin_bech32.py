@@ -10,7 +10,7 @@ HRP: typing.Final[str] = "bc"
 WITVER: typing.Final[int] = 0
 
 
-@registry.register("bitcoin_bech32", "BTC-bech32")
+@registry.register("bitcoin_bech32", "BTC-bc")
 class BitcoinBech32(networks.BaseNetwork):
     def public_key_to_address(self, node: keys.PublicKey) -> typing.Optional[str]:
         key = binascii.unhexlify(node.hex())

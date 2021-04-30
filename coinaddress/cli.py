@@ -36,6 +36,8 @@ def main(
 
     * `bitcoin` or `BTC`
 
+    * `bitcoin_bech32` or `BTC-bc`
+
     * `bitcoin_cash` or `BCH`
 
     * `ethereum` or `ETH`
