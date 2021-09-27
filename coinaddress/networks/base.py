@@ -3,14 +3,9 @@ import typing
 from binascii import hexlify, unhexlify
 
 import base58
-from sha3 import keccak_256
 
 from coinaddress.keys import PublicKey
 from coinaddress.utils import verifying_key_from_hex
-
-
-def sha3(seed: bytes) -> bytes:
-    return keccak_256(seed).digest()
 
 
 class BaseNetwork:
@@ -50,4 +45,4 @@ class BaseNetwork:
             verifying_key=verifying_key,
         )
 
-__all__: typing.Final[typing.List[str]] = ["sha3", "BaseNetwork"]
+__all__: typing.Final[typing.List[str]] = ["BaseNetwork"]

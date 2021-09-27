@@ -8,11 +8,14 @@ from coinaddress.networks.base import BaseNetwork
 from coinaddress.networks.registry import registry
 
 
+def sha3(seed: bytes) -> bytes:
+    """Computes a keccak256 digest of the given seed bytes."""
+    return keccak_256(seed).digest()
+
+
 def to_checksum_address(value: str) -> str:
     norm_address = value.lower()
-    address_hash = "0x" + hexlify(
-        keccak_256(norm_address[2:].encode()).digest()
-    ).decode("ascii")
+    address_hash = "0x" + hexlify(sha3(norm_address[2:].encode())).decode("ascii")
 
     checksum_address = "".join(
         (norm_address[i].upper() if int(address_hash[i], 16) > 7 else norm_address[i])
@@ -32,4 +35,4 @@ class Ethereum(BaseNetwork):
         return to_checksum_address(eth_address)
 
 
-__all__: typing.Final[typing.List[str]] = ["to_checksum_address", "Ethereum"]
+__all__: typing.Final[typing.List[str]] = ["sha3", "to_checksum_address", "Ethereum"]
